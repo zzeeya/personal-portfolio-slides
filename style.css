@@ -1,0 +1,227 @@
+@import url('https://fonts.googleapis.com/css2?family=ABeeZee:ital@0;1&family=Inter:wght@300;400;500;700&display=swap');
+
+:root { --blue: rgb(62, 62, 255); --ink: #252525; }
+
+* { box-sizing: border-box; }
+html, body { margin: 0; min-width: 320px; background: #fff; scrollbar-width: none; }
+html::-webkit-scrollbar, body::-webkit-scrollbar, .project-scroll::-webkit-scrollbar { width: 0; height: 0; }
+body { color: var(--blue); font-family: Inter, Arial, Helvetica, sans-serif; }
+body.project-open { overflow: hidden; }
+
+/* The desktop coordinates are proportional to the 1936 × 2160 Figma frame. */
+.artboard {
+  width: 100%; margin: 0 auto; position: relative;
+  overflow: hidden; background: #fff;
+}
+.intro-board { max-width: 1936px; height: 100svh; min-height: 100svh; aspect-ratio: auto; }
+.content-board {
+  max-width: 1919px; height: 100svh; min-height: 100svh; aspect-ratio: auto;
+  position: relative; isolation: isolate; background: #fff;
+}
+.content-preview {
+  position: absolute; z-index: 0; inset: 0;
+  opacity: 0; pointer-events: none;
+  background-image: var(--content-preview-image, none);
+  /* Figma's category home frames are tall canvases. Fit the complete frame
+     inside the viewport so its first section is never cropped at the edges. */
+  background-position: center center; background-size: auto 100%; background-repeat: no-repeat;
+  filter: none;
+  background-color: #000;
+  background-blend-mode: normal;
+  transition: opacity 520ms cubic-bezier(.22, .61, .36, 1);
+}
+/* Layout/Book Design's Figma home frame is taller than Internship2. Match its
+   rendered width to Internship2 without changing any other category scale. */
+.content-board[data-preview-project="layout"] .content-preview {
+  background-size: auto 111.8%;
+}
+.content-preview::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: .72;
+  background: url("assets/portfolio-texture.png") center / cover no-repeat;
+  mix-blend-mode: multiply;
+}
+.content-board.has-preview .content-preview { opacity: .82; }
+.content-board.has-preview { background: #000; }
+.content-art {
+  position: absolute; z-index: 1; inset: 0; pointer-events: none;
+  /* Use the original transparent Figma export directly. This keeps the
+     paper/tape silhouette, edge texture, and native Figma shadow intact. */
+  background: url("assets/figma-content-board-nohalo-v8.png") center / auto 100% no-repeat;
+  filter: none;
+}
+.title {
+  position: absolute; top: 3.06%; left: 2.53%; margin: 0;
+  font-size: clamp(25px, 6.67vw, 128px); line-height: 1; letter-spacing: -.32px;
+  font-weight: 500; white-space: nowrap;
+}
+.portfolio-word {
+  position: absolute; top: 20.1%; left: 2.53%; width: 68.5%;
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: clamp(27px, 6.67vw, 128px); line-height: 1; font-weight: 500;
+  --stage-y: 1;
+  transform: scaleY(var(--stage-y)); transform-origin: left bottom;
+  transition: top 850ms cubic-bezier(.16, 1, .3, 1), transform 850ms cubic-bezier(.16, 1, .3, 1);
+}
+.portfolio-word span {
+  display: block; transform-origin: center bottom; will-change: transform, font-weight;
+  --pressure-x: 1; --pressure-y: 1; --pressure-skew: 0deg;
+  transform: scaleX(var(--pressure-x)) scaleY(var(--pressure-y)) skewX(var(--pressure-skew));
+  transition: transform 120ms ease-out, font-weight 120ms ease-out;
+}
+.intro-board.stage-1 .portfolio-word { top: 20.1%; --stage-y: 1; }
+.intro-board.stage-2 .portfolio-word { top: 20.1%; --stage-y: 1; }
+.intro {
+  position: absolute; left: 2.53%; top: 51.39%; margin: 0;
+  font-size: clamp(13px, 2.09vw, 40px); line-height: 1.25; letter-spacing: -.4px;
+  font-weight: 300; white-space: nowrap;
+}
+.about {
+  position: absolute; left: 53.88%; top: 71.94%; width: 43.6%; margin: 0;
+  text-align: right; font-size: clamp(8px, 1.25vw, 24px); line-height: 1.34;
+  letter-spacing: -.24px; font-weight: 300; white-space: nowrap;
+}
+.scroll-reveal { opacity: 0; pointer-events: none; }
+.scroll-reveal.is-prepared { opacity: 1; }
+.text-anim-char {
+  display: inline-block; opacity: 0; transform: translate3d(0, 20px, 0);
+  will-change: transform, opacity;
+  transition: opacity 1150ms cubic-bezier(.22, .61, .36, 1), transform 1150ms cubic-bezier(.22, .61, .36, 1);
+}
+.scroll-reveal.is-revealed .text-anim-char { opacity: 1; transform: translate3d(0, 0, 0); }
+
+.content-hit-list {
+  position: absolute; z-index: 10; left: 37.8%; top: 32.4%; width: 29.2%; height: 24.5%;
+  /* Keep the transparent interaction layer aligned to the six printed rows.
+     The artwork remains untouched; this only makes the whole row clickable. */
+  pointer-events: auto;
+}
+.content-hit {
+  position: absolute; left: 0; top: calc(var(--row) * 11.78%); width: 100%; height: 14%;
+  border: 0; background: transparent; color: transparent; cursor: pointer; padding: 0; pointer-events: auto;
+  /* Prevent neighboring transparent rows from stealing the click. */
+  touch-action: manipulation;
+}
+.content-hit:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+.content-hit:disabled { cursor: default; }
+.project-viewer {
+  position: fixed; inset: 0; z-index: 20; visibility: hidden; opacity: 0;
+  pointer-events: none; background: #fff; overflow: hidden;
+  transition: opacity 240ms cubic-bezier(.22, .61, .36, 1), visibility 0s linear 240ms;
+}
+.project-viewer.is-open { visibility: visible; opacity: 1; pointer-events: auto; transition-delay: 0s; }
+.project-viewer.is-preparing { visibility: hidden; opacity: 0; pointer-events: none; }
+.project-viewer.is-closing { visibility: visible; opacity: 0; pointer-events: none; }
+.project-viewer.is-loading::after {
+  content: ""; position: absolute; z-index: 21; top: 50%; left: 50%; width: 22px; height: 22px;
+  margin: -11px 0 0 -11px; border: 2px solid rgb(62 62 255 / .18);
+  border-top-color: var(--blue); border-radius: 50%; animation: project-spin 720ms linear infinite;
+  pointer-events: none;
+}
+@keyframes project-spin { to { transform: rotate(360deg); } }
+.project-scroll { width: 100%; height: 100%; overflow-y: auto; overscroll-behavior: contain; background: #fff; position: relative; }
+.project-layer {
+  position: relative;
+  width: 100%;
+  max-width: 1936px;
+  margin: 0 auto;
+  overflow: hidden;
+  isolation: isolate;
+}
+.project-backdrop {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+  display: none;
+  pointer-events: none;
+}
+.project-canvas {
+  position: relative;
+  /* Restore the native Figma export width. The latest Figma frames already
+     contain the corrected proportions; do not scale the detail page itself. */
+  width: 100%;
+  max-width: 1936px;
+  margin: 0 auto;
+  z-index: 1;
+}
+.project-layer.is-incoming {
+  position: absolute; z-index: 3; top: 0; left: 50%; width: 100%;
+  transform: translateX(-50%); opacity: 0; pointer-events: none;
+  transition: opacity 360ms cubic-bezier(.22, .61, .36, 1);
+}
+.project-layer.is-incoming.is-visible { opacity: 1; }
+.project-scroll img { display: block; width: 100%; height: auto; }
+.project-scroll .project-backdrop {
+  display: none;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+.project-thumb-hit {
+  position: absolute; z-index: 2; top: var(--nav-top); left: var(--nav-left);
+  width: var(--nav-width); height: var(--nav-height); border: 0; padding: 0;
+  background: transparent; cursor: pointer; border-radius: 3px;
+}
+.project-thumb-hit:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+.project-link-hotspot {
+  position: absolute; z-index: 2;
+  top: var(--link-top); left: var(--link-left);
+  width: var(--link-width); height: var(--link-height);
+  display: block; cursor: pointer;
+}
+.project-link-hotspot:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; }
+.project-close {
+  position: fixed; z-index: 22; top: 14px; left: 8px; width: 42px; height: 42px;
+  border: 0; background: transparent; cursor: pointer;
+  transition: transform 240ms cubic-bezier(.2,.8,.2,1), opacity 240ms ease;
+  color: var(--blue); font: 300 36px/1 Inter, sans-serif;
+}
+.project-close::before { content: "←"; position: absolute; left: 50%; top: 50%; transform: translate(-53%, -54%); }
+.project-close:hover { transform: translateX(-3px); opacity: .7; }
+.project-close:hover::before { transform: translate(-53%, -54%); }
+.paper-shadow {
+  position: absolute; z-index: 1; inset: 0;
+  filter: drop-shadow(0 5px 4px rgb(0 0 0 / .216));
+}
+.paper {
+  position: absolute; z-index: 1; inset: 0;
+  clip-path: polygon(0 2.5%, 3% .25%, 6% 2.5%, 9% .25%, 12% 2.5%, 15% .25%, 18% 2.5%, 21% .25%, 24% 2.5%, 27% .25%, 30% 2.5%, 33% .25%, 36% 2.5%, 39% .25%, 42% 2.5%, 45% .25%, 48% 2.5%, 51% .25%, 54% 2.5%, 57% .25%, 60% 2.5%, 63% .25%, 66% 2.5%, 69% .25%, 72% 2.5%, 75% .25%, 78% 2.5%, 81% .25%, 84% 2.5%, 87% .25%, 90% 2.5%, 93% .25%, 96% 2.5%, 100% .25%, 100% 97.5%, 97% 99.6%, 94% 97.5%, 91% 99.6%, 88% 97.5%, 85% 99.6%, 82% 97.5%, 79% 99.6%, 76% 97.5%, 73% 99.6%, 70% 97.5%, 67% 99.6%, 64% 97.5%, 61% 99.6%, 58% 97.5%, 55% 99.6%, 52% 97.5%, 49% 99.6%, 46% 97.5%, 43% 99.6%, 40% 97.5%, 37% 99.6%, 34% 97.5%, 31% 99.6%, 28% 97.5%, 25% 99.6%, 22% 97.5%, 19% 99.6%, 16% 97.5%, 13% 99.6%, 10% 97.5%, 7% 99.6%, 4% 97.5%, 1% 99.6%, 0 97.5%);
+  /* Exported directly by Figma MCP: retain the original paper texture and cut edge. */
+  clip-path: none;
+  -webkit-mask: url("assets/figma-receipt-mask.svg") center / 100% 100% no-repeat;
+  mask: url("assets/figma-receipt-mask.svg") center / 100% 100% no-repeat;
+  background: #fafafa url("assets/figma-receipt-fill.png") center / 100% 100% no-repeat;
+}
+.paper::before {
+  display: none;
+}
+.tape {
+  position: absolute; z-index: 2;
+  top: -7.4%; left: 12%; width: 84%; height: auto;
+  transform: rotate(-7deg);
+}
+.receipt-copy { position: absolute; inset: 20% 10% 5% 10%; color: var(--ink); }
+.receipt h2 { margin: 0 0 10.9%; text-align: center; font: 700 clamp(5px, 5.69cqw, 46px)/1 Palatino, "Palatino Linotype", serif; letter-spacing: 0; }
+.contents { display: flex; justify-content: space-between; font: 400 clamp(2px, 2.47cqw, 20px)/1.55 ABeeZee, Arial, sans-serif; }
+.contents ol { margin: 0; padding: 0; list-style: none; }
+.numbers { text-align: right; padding-right: 1.5% !important; font-family: "42dot Sans", "Arial Narrow", Arial, sans-serif; font-size: clamp(2px, 2.6cqw, 21px); line-height: 1.5; }
+.rule { position: absolute; top: 43%; left: -11.2%; right: -11.2%; height: 1px; background: rgb(35 35 35 / .5); }
+.signature { position: absolute; top: 50%; left: 0; right: 0; color: var(--blue); font: 400 clamp(4px, 3.71cqw, 30px)/1 ABeeZee, Arial, sans-serif; letter-spacing: 0; margin: 0; text-align: center; white-space: nowrap; }
+.perforation { position: absolute; top: 65%; left: -8%; right: -8%; border-top: clamp(.5px, .38cqw, 2px) dashed #202020; }
+.barcode {
+  position: absolute; left: 50%; bottom: 5%; width: 58%; height: 12.5%; margin: 0;
+  transform: translateX(-50%);
+  background:
+    linear-gradient(90deg, #252525 0 7%, transparent 7% 8.5%, #252525 48% 53%, transparent 53% 54.5%, #252525 94% 96%, transparent 96%),
+    repeating-linear-gradient(90deg, #252525 0 2px, transparent 2px 4px, #252525 4px 5px, transparent 5px 8px, #252525 8px 11px, transparent 11px 13px, #252525 13px 14px, transparent 14px 17px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-anim-char { transition: none; transform: none; }
+}
