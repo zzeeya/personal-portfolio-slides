@@ -87,10 +87,24 @@ const projectAssetVersion = 'figma-ai-movie-2';
 function preloadProjectImage(name) {
   if (projectImageReady.has(name)) return projectImageReady.get(name);
   const image = new Image();
-  image.src = `assets/projects/${name}?v=${projectAssetVersion}`;
-  const ready = image.decode
-    ? image.decode().catch(() => new Promise(resolve => image.addEventListener('load', resolve, { once: true })))
-    : new Promise(resolve => image.addEventListener('load', resolve, { once: true }));
+  // Resolve from the load/error events first. Calling decode() immediately
+  // after assigning src is unreliable for large exported Figma PNGs: Chrome
+  // can reject decode after the load event has already fired, leaving a
+  // late-added load listener waiting forever and making thumbnail clicks look
+  // unresponsive. The load event is sufficient here because showProjectFrame
+  // inserts the same URL into the visible canvas after this promise settles.
+  const ready = new Promise(resolve => {
+    let settled = false;
+    const settle = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+    image.addEventListener('load', settle, { once: true });
+    image.addEventListener('error', settle, { once: true });
+    image.src = `assets/projects/${name}?v=${projectAssetVersion}`;
+    if (image.complete) settle();
+  });
   projectImageReady.set(name, ready);
   return ready;
 }
