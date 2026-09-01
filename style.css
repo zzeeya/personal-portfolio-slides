@@ -94,7 +94,7 @@ body.project-open { overflow: hidden; }
 .scroll-reveal.is-revealed .text-anim-char { opacity: 1; transform: translate3d(0, 0, 0); }
 
 .content-hit-list {
-  position: absolute; z-index: 10; left: 37.8%; top: 32.4%; width: 29.2%; height: 24.5%;
+  position: absolute; z-index: 10; left: 37.8%; top: 29.9%; width: 29.2%; height: 24.5%;
   /* Keep the transparent interaction layer aligned to the six printed rows.
      The artwork remains untouched; this only makes the whole row clickable. */
   pointer-events: auto;
