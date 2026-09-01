@@ -106,6 +106,13 @@ const projectPreviewImages = {
   aiMovie: 'frame32-home-bw.png'
 };
 
+// Start decoding every category home frame while the intro is on screen. The
+// preview is a full-size Figma export, so waiting until the first hover makes
+// the black board visible before the image arrives. Eager decoding means the
+// first hover can reveal the correct frame immediately, including on a fresh
+// page visit where no browser image cache exists yet.
+Object.values(projectPreviewImages).forEach(preloadProjectImage);
+
 function setContentPreview(projectKey) {
   const previewImage = projectPreviewImages[projectKey];
   if (!previewImage) {
